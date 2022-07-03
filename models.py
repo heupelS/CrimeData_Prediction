@@ -1,5 +1,4 @@
 #%%
-import string
 from time import time
 import pandas as pd
 import numpy as np
@@ -66,7 +65,7 @@ crimeData_train, crimeData_test = train_test_split(crimeData, test_size=0.33, ra
 
 #%% Decision tree modeling
 
-clf = tree.DecisionTreeClassifier(max_depth=10)
+clf = tree.DecisionTreeClassifier(max_depth=5)
 cl_fit = clf.fit(crimeData_train[features], crimeData_train['CrmCd.Desc'])
 print("Model Accuracy:")
 print(cl_fit.score(crimeData_test[features],crimeData_test['CrmCd.Desc']))
@@ -76,7 +75,7 @@ listOfClassNames = list(set(crimeData['CrmCd.Desc']))
 dot_data = tree.export_graphviz(cl_fit, out_file=None, feature_names=features, class_names= listOfClassNames, filled=True, rounded=True, special_characters=True)
 graph = pydotplus.graph_from_dot_data(dot_data)
 
-graph.write_pdf("decTree_iris22.pdf")
+graph.write_pdf("decTree_iris.pdf")
 
 # %%
 if __name__ == "__main__":
