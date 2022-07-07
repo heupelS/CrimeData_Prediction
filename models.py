@@ -3,7 +3,6 @@ from time import time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrsistent import T
 from sklearn import datasets
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -58,7 +57,7 @@ crimeData.head()
 #%% features and targets
 
 features = ['AREA','Year','Month','Day','Hour','Minute']
-targets = ['AREA.NAME','LOCATION','DATE.OCC']
+targets = ['AREA.NAME']
 
 #%% dividing into train and test
 crimeData_train, crimeData_test = train_test_split(crimeData, test_size=0.33, random_state=10)
@@ -66,12 +65,12 @@ crimeData_train, crimeData_test = train_test_split(crimeData, test_size=0.33, ra
 #%% Decision tree modeling
 
 clf = tree.DecisionTreeClassifier(max_depth=5)
-cl_fit = clf.fit(crimeData_train[features], crimeData_train['CrmCd.Desc'])
+cl_fit = clf.fit(crimeData_train[features], crimeData_train['AREA.NAME'])
 print("Model Accuracy:")
-print(cl_fit.score(crimeData_test[features],crimeData_test['CrmCd.Desc']))
+print(cl_fit.score(crimeData_test[features],crimeData_test['AREA.NAME']))
 
 #%% visualization
-listOfClassNames = list(set(crimeData['CrmCd.Desc']))
+listOfClassNames = list(set(crimeData['AREA.NAME']))
 dot_data = tree.export_graphviz(cl_fit, out_file=None, feature_names=features, class_names= listOfClassNames, filled=True, rounded=True, special_characters=True)
 graph = pydotplus.graph_from_dot_data(dot_data)
 
