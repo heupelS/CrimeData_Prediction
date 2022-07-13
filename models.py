@@ -14,12 +14,14 @@ import datetime
 
 #%% Overview
 
-crimeData = pd.DataFrame(pd.read_csv(data_path))
+
 #print("Total number of crimes in the dataset: {}".format(len(crimeData)))
 
 
 #%% Cleaning
 def clean_data():
+    crimeData = pd.DataFrame(pd.read_csv(data_path))
+
     crimeData = crimeData.dropna(subset=['AREA','TIME.OCC','CrmCd.Desc'])
     crimeData['date2'] = pd.to_datetime((crimeData['DATE.OCC']))
     crimeData['Year'] = crimeData['date2'].dt.year
@@ -53,38 +55,49 @@ def clean_data():
 
     print("Total number of crimes in the dataset: {}".format(len(crimeData)))
     crimeData.head()
+    return crimeData
 
 #%% features and targets
-
-features = ['AREA','Year','Month','Day','Hour','Minute']
-targets = ['AREA.NAME']
+def features_target():
+    features = ['AREA','Year','Month','Day','Hour','Minute']
+    target = 'AREA.NAME'
+    return features,target
 
 #%% dividing into train and test
-crimeData_train, crimeData_test = train_test_split(crimeData, test_size=0.33, random_state=10)
+def train_test(crimeData):
+    crimeData_train, crimeData_test = train_test_split(crimeData, test_size=0.33, random_state=10)
+    return crimeData_train,crimeData_test
 
 #%% Decision tree modeling
-def decision_tree():
+def decision_tree(crimeData_train,crimeData_test,features,target):
     clf = tree.DecisionTreeClassifier(max_depth=5)
-    cl_fit = clf.fit(crimeData_train[features], crimeData_train['AREA.NAME'])
+    cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
-    print(cl_fit.score(crimeData_test[features],crimeData_test['AREA.NAME']))
+    print(cl_fit.score(crimeData_test[features],crimeData_test[target]))
     return cl_fit
 
 #%% visualization
-def visualize():
-    listOfClassNames = list(set(crimeData['AREA.NAME']))
+def visualize(crimeData,features,target,cl_fit):
+    listOfClassNames = list(set(crimeData[target]))
     dot_data = tree.export_graphviz(cl_fit, out_file=None, feature_names=features, class_names= listOfClassNames, filled=True, rounded=True, special_characters=True)
     graph = pydotplus.graph_from_dot_data(dot_data)
 
     graph.write_pdf("decTree_iris.pdf")
 
 ##%
-def get_all_crimetypes():
+def get_all_crimetypes(crimeData):
     return crimeData['CrmCd.Desc'].unique()
 # %%
 if __name__ == "__main__":
 
     data_path = "Data/Crimes_2012-2016.csv"
+    crimeData = clean_data()
+    features,target = features_target()
+    crimeData_train,crimeData_test = train_test(crimeData)
+    cl_fit = decision_tree(crimeData_train,crimeData_test,features,target)
+    visualize(crimeData,features,target,cl_fit)
+
+
 
 
 # %%
