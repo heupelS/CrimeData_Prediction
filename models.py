@@ -84,7 +84,7 @@ def clean_data():
 
 
 def features_target():
-    features = ['Hour']
+    features = ['Hour','Month','Location']
     target = 'Categories'
     category_names = ['Offences against the Person', 'Sexual Offences', 'Offences under the Theft and Fraud Acts','Forgery, Personation and Cheating','Criminal Damage and Kindred Offences','Firearms and Offensive Weapons',
     'Harmful or Dangerous Drugs','Offences against Public Justice','Public Order Offences','Business, Revenue and Customs Offences',  'Offences Relating to Marriage, Public Nuisance and Obscene or Indecent Publications','Motor Vehicle Offences'
@@ -103,7 +103,7 @@ def train_test(crimeData):
 
 
 def decision_tree(crimeData_train, crimeData_test, features, target):
-    clf = tree.DecisionTreeClassifier(max_depth=4)
+    clf = tree.DecisionTreeClassifier(max_depth=3)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
