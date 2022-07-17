@@ -119,13 +119,8 @@ def clean_data():
 
 
 def features_target():
-<<<<<<< HEAD
-    features = ['Hour','Month','AREA']
-    target = 'Categories'
-=======
     features = area_selector_names
     target = 'Crm.Cd'
->>>>>>> 8bf13d39f0b431616a6380432c4b4b257f421653
     category_names = ['Offences against the Person', 'Sexual Offences', 'Offences under the Theft and Fraud Acts','Forgery, Personation and Cheating','Criminal Damage and Kindred Offences','Firearms and Offensive Weapons',
     'Harmful or Dangerous Drugs','Offences against Public Justice','Public Order Offences','Business, Revenue and Customs Offences',  'Offences Relating to Marriage, Public Nuisance and Obscene or Indecent Publications','Motor Vehicle Offences'
     ,'Other']
@@ -151,7 +146,7 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
 
 # %% visualization
 
-def visualize(crimeData, features, category_names, cl_fit):
+def visualize(features, category_names, cl_fit):
     dot_data = tree.export_graphviz(cl_fit, out_file=None, feature_names=features,
                                     class_names=category_names, filled=True, rounded=True, special_characters=True)
     graph = pydotplus.graph_from_dot_data(dot_data)
