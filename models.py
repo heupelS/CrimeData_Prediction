@@ -67,9 +67,9 @@ def clean_data():
                                                                      ], [121,122,805,810,815,820,821,830,840,850,932,933,753,756,761,931,439,900,901,902,903
                                                                          ], []]
 
-    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery & Grand Theft',
-                        'Battery','Aggravated Assault','Spousal Abuse & Threats','Criminal Damage and Kindred Offences',
-                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms & public justice','Other']
+    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
+                        'Battery','Aggravated Assault','SAT','Criminal Damage and Kindred Offences',
+                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
 
     new_categories = []
     for number in crimeData['Crm.Cd']:
@@ -129,9 +129,9 @@ def clean_data():
 def features_target():
     features = ['Month', 'Hour']
     target = 'Categories'
-    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery & Grand Theft',
-                        'Battery','Aggravated Assault','Spousal Abuse & Threats','Criminal Damage and Kindred Offences',
-                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms & public justice','Other']
+    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
+                        'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
+                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
     return features, target, category_names
 
 # %% dividing into train and test
