@@ -1,6 +1,7 @@
 # %%
 from time import time
 from unicodedata import category
+from xmlrpc.client import Boolean
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,20 +73,53 @@ def clean_data():
             if number in category_numbers[i]:
                 new_categories.append(category_names[i])
                 break
+
+    area_selector = [[] for i in range(21)]
+
+    for row in crimeData['AREA']:
+        for i in range(1,22):
+            if i == row:
+                area_selector[i-1].append(True)
+            else:
+                area_selector[i-1].append(False)
+
     
     crimeData['Categories'] = new_categories
+
+    crimeData['cat_fact'] = pd.factorize(crimeData["Categories"])[0]
+
+    global area_selector_names
+    area_selector_names = []
+
+    for i in range(1,22):
+        area_selector_names.append('area_selector_'+str(i))
+        crimeData['area_selector_'+str(i)] = area_selector[i-1]
+
+    category_selector = [[] for i in range(13)]
+    for row in crimeData['cat_fact']:
+        for i in range(13):
+            if i == row:
+                category_selector[i].append(True)
+            else:
+                category_selector[i].append(False)
+
+    global category_selector_names
+    category_selector_names = []
+    
+    for i in range(13):
+        category_selector_names.append('category_selector_'+str(i))
+        crimeData['category_selector_'+str(i)] = area_selector[i-1]
     
     print("Total number of crimes in the dataset: {}".format(len(crimeData)))
     
-    crimeData['AREA.NAME'] = pd.factorize(crimeData["AREA.NAME"])[0]
     return crimeData
 
 # %% features and targets
 
 
 def features_target():
-    features = ['Hour']
-    target = 'Categories'
+    features = area_selector_names
+    target = 'Crm.Cd'
     category_names = ['Offences against the Person', 'Sexual Offences', 'Offences under the Theft and Fraud Acts','Forgery, Personation and Cheating','Criminal Damage and Kindred Offences','Firearms and Offensive Weapons',
     'Harmful or Dangerous Drugs','Offences against Public Justice','Public Order Offences','Business, Revenue and Customs Offences',  'Offences Relating to Marriage, Public Nuisance and Obscene or Indecent Publications','Motor Vehicle Offences'
     ,'Other']
