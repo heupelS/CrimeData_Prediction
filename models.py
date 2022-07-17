@@ -65,8 +65,7 @@ def clean_data():
                                                              ], [354,649,651,652,660,662,664,666
                                                                  ], [438, 890, 997
                                                                      ], [121,122,805,810,815,820,821,830,840,850,932,933,753,756,761,931,439,900,901,902,903
-                                                                         ], [range(997)
-                                                                            ]]
+                                                                         ], []]
 
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery & Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse & Threats','Criminal Damage and Kindred Offences',
@@ -75,6 +74,9 @@ def clean_data():
     new_categories = []
     for number in crimeData['Crm.Cd']:
         for i in range(14):
+            if i == 13:
+                new_categories.append(category_names[i])
+                break
             if number in category_numbers[i]:
                 new_categories.append(category_names[i])
                 break
