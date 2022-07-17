@@ -68,7 +68,7 @@ def clean_data():
                                                                          ], []]
 
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
-                        'Battery','Aggravated Assault','SAT','Criminal Damage and Kindred Offences',
+                        'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
                         'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
 
     new_categories = []
