@@ -74,7 +74,7 @@ def clean_data():
 
     new_categories = []
     for number in crimeData['Crm.Cd']:
-        for i in range(13):
+        for i in range(14):
             if number in category_numbers[i]:
                 new_categories.append(category_names[i])
                 break
@@ -113,7 +113,7 @@ def clean_data():
     global category_selector_names
     category_selector_names = []
     
-    for i in range(13):
+    for i in range(14):
         category_selector_names.append('category_selector_'+str(i))
         crimeData['category_selector_'+str(i)] = area_selector[i-1]
     
@@ -127,9 +127,9 @@ def clean_data():
 def features_target():
     features = ['Month', 'Hour']
     target = 'Categories'
-    category_names = ['Offences-against-the-Person', 'Sexual-Offences', 'Offences-under-the-Theft-and-Fraud-Acts','Forgery-Personation-and-Cheating','Criminal-Damage-and-Kindred-Offences','Firearms-and-Offensive-Weapons',
-    'Harmful-or-Dangerous-Drugs','Offences-against-Public-Justice','Public-Order-Offences','Business-Revenue-and-Customs-Offences',  'Offences-Relating-to-Marriage-Public-Nuisance-and-Obscene-or-Indecent-Publications','Motor-Vehicle-Offences'
-    ,'Other']
+    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery & Grand Theft',
+                        'Battery','Aggravated Assault','Spousal Abuse & Threats','Criminal Damage and Kindred Offences',
+                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms & public justice','Other']
     return features, target, category_names
 
 # %% dividing into train and test
