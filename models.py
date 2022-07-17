@@ -49,24 +49,25 @@ def clean_data():
 
     crimeData.head(5)
 
-    category_numbers = [[110, 111, 113, 230, 231, 235, 236, 237, 250, 251, 434, 435, 436, 437, 622, 623, 624, 625, 626, 627, 647, 763, 812, 813, 860, 870, 910, 920, 922, 928, 930, 952
-                         ], [121, 122, 805, 810, 815, 820, 821, 830, 840, 850, 932, 933
-                             ], [210, 220, 310, 320, 330, 331, 341, 343, 345, 347, 349, 350, 351, 352, 353, 410, 420, 421, 430, 431, 433, 440, 441, 442, 443, 444, 445, 446, 450, 451, 452, 470, 471, 473, 474, 475, 480, 485, 487, 510, 520, 653, 654, 668, 670, 940, 950, 951
-                                 ], [354, 649, 651, 652, 660, 662, 664, 666
-                                     ], [648, 740, 745, 924
-                                         ], [753, 756, 761, 931
-                                             ], [865
-                                                 ], [439, 900, 901, 902, 903
-                                                     ], [755, 882, 884, 886, 944
-                                                         ], [942
-                                                             ], [948
+    category_numbers = [[510,480,520,487
+                         ], [330,410
+                             ], [310,320
+                                 ], [440,442
+                                     ], [420,331
+                                         ], [210,220,341,668,343,350
+                                             ], [624,860
+                                                 ], [230,236
+                                                     ], [626,930
+                                                         ], [648,740,745,924
+                                                             ], [354,649,651,652,660,662,664,666
                                                                  ], [438, 890, 997
-                                                                     ], [432, 661, 762, 806, 845, 880, 888, 943, 946, 949, 954, 956
-                                                                         ]]
+                                                                     ], [121,122,805,810,815,820,821,830,840,850,932,933,753,756,761,931,439,900,901,902,903
+                                                                         ], [range(997)
+                                                                            ]]
 
-    category_names = ['Offences against the Person', 'Sexual Offences', 'Offences under the Theft and Fraud Acts','Forgery, Personation and Cheating','Criminal Damage and Kindred Offences','Firearms and Offensive Weapons',
-    'Harmful or Dangerous Drugs','Offences against Public Justice','Public Order Offences','Business, Revenue and Customs Offences',  'Offences Relating to Marriage, Public Nuisance and Obscene or Indecent Publications','Motor Vehicle Offences'
-    ,'Other']
+    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery & Grand Theft',
+                        'Battery','Aggravated Assault','Spousal Abuse & Threats','Criminal Damage and Kindred Offences',
+                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms & public justice','Other']
 
     new_categories = []
     for number in crimeData['Crm.Cd']:
