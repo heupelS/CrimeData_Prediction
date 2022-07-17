@@ -8,6 +8,7 @@ from sklearn import datasets
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn import tree
+from sklearn.dummy import DummyClassifier
 import pydotplus
 import graphviz
 import datetime
@@ -84,7 +85,7 @@ def clean_data():
 
 
 def features_target():
-    features = ['Hour','Month','Location']
+    features = ['Hour','Month','AREA']
     target = 'Categories'
     category_names = ['Offences against the Person', 'Sexual Offences', 'Offences under the Theft and Fraud Acts','Forgery, Personation and Cheating','Criminal Damage and Kindred Offences','Firearms and Offensive Weapons',
     'Harmful or Dangerous Drugs','Offences against Public Justice','Public Order Offences','Business, Revenue and Customs Offences',  'Offences Relating to Marriage, Public Nuisance and Obscene or Indecent Publications','Motor Vehicle Offences'
@@ -112,9 +113,8 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
 # %% visualization
 
 def visualize(crimeData, features, category_names, cl_fit):
-    listOfClassNames = category_names
     dot_data = tree.export_graphviz(cl_fit, out_file=None, feature_names=features,
-                                    class_names=listOfClassNames, filled=True, rounded=True, special_characters=True)
+                                    class_names=category_names, filled=True, rounded=True, special_characters=True)
     graph = pydotplus.graph_from_dot_data(dot_data)
 
     graph.write_pdf("decTree_crimeData.pdf")
@@ -124,6 +124,16 @@ def visualize(crimeData, features, category_names, cl_fit):
 
 def get_all_crimetypes(crimeData):
     return crimeData['CrmCd.Desc'].unique()
+
+
+#%% majority
+def majority_classifier(features, crimeData_train, crimeData_test, target):
+    dummy_clf = DummyClassifier(strategy="most_frequent")
+    dummy_clf.fit(crimeData_train[features], crimeData_train[target])
+    DummyClassifier(strategy='most_frequent')
+    dummy_clf.predict(crimeData_test[features])
+    dummy_clf.score(crimeData_test[features], crimeData_test[target])
+
 
 
 # %%
@@ -137,6 +147,6 @@ if __name__ == "__main__":
     crimeData_train, crimeData_test = train_test(crimeData)
     cl_fit = decision_tree(crimeData_train, crimeData_test, features, target)
     visualize(crimeData, features, category_names, cl_fit)
-
+    majority_classifier(features, crimeData_train, crimeData_test, target)
 
 # %%
