@@ -127,7 +127,7 @@ def clean_data():
 
 
 def features_target():
-    features = ['Month', 'Hour']
+    features = ['Month','Hour','Minute','Year'] + area_selector_names
     target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
@@ -146,7 +146,7 @@ def train_test(crimeData):
 
 
 def decision_tree(crimeData_train, crimeData_test, features, target):
-    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=7)
+    clf = tree.DecisionTreeClassifier(criterion ="entropy",max_depth=10)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
     #cl_fit2 = clf.predict(crimeData_test[features])
@@ -198,7 +198,7 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
     dummy_clf.fit(crimeData_train[features], crimeData_train[target])
     DummyClassifier(strategy='most_frequent')
     dummy_clf.predict(crimeData_test[features])
-    dummy_clf.score(crimeData_test[features], crimeData_test[target])
+    print(dummy_clf.score(crimeData_test[features], crimeData_test[target]))
 
 
 
