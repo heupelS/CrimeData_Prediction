@@ -67,6 +67,22 @@ def clean_data():
     crimeData['Daytime'] = daytime
     crimeData['daytime_fact'] = pd.factorize(crimeData['Daytime'])[0]
 
+    daytime_selector = [[] for i in range(4)]
+
+    for row in crimeData['daytime_fact']:
+        for i in range(4):
+            if i == row:
+                daytime_selector[i].append(True)
+            else:
+                daytime_selector[i].append(False)
+
+    global daytime_selector_names
+    daytime_selector_names = []
+    
+    for i in range(4):
+        daytime_selector_names.append('daytime_selector_'+str(i))
+        crimeData['daytime_selector_'+str(i)] = daytime_selector[i]
+
     season = []
 
     for month in crimeData['Month']:
@@ -81,6 +97,23 @@ def clean_data():
 
     crimeData['Season'] = season
     crimeData['season_fact'] = pd.factorize(crimeData['Season'])[0]
+
+    season_selector = [[] for i in range(4)]
+
+    for row in crimeData['season_fact']:
+        for i in range(4):
+            if i == row:
+                season_selector[i].append(True)
+            else:
+                season_selector[i].append(False)
+
+    global season_selector_names
+    season_selector_names = []
+    
+    for i in range(4):
+        season_selector_names.append('season_selector_'+str(i))
+        crimeData['season_selector_'+str(i)] = season_selector[i]
+
 
     category_numbers = [[510,480,520,487
                          ], [330,410
@@ -133,21 +166,6 @@ def clean_data():
     for i in range(1,22):
         area_selector_names.append('area_selector_'+str(i))
         crimeData['area_selector_'+str(i)] = area_selector[i-1]
-
-    category_selector = [[] for i in range(13)]
-    for row in crimeData['cat_fact']:
-        for i in range(13):
-            if i == row:
-                category_selector[i].append(True)
-            else:
-                category_selector[i].append(False)
-
-    global category_selector_names
-    category_selector_names = []
-    
-    for i in range(14):
-        category_selector_names.append('category_selector_'+str(i))
-        crimeData['category_selector_'+str(i)] = area_selector[i-1]
     
     print("Total number of crimes in the dataset: {}".format(len(crimeData)))
     
@@ -157,7 +175,7 @@ def clean_data():
 
 
 def features_target():
-    features = area_selector_names + ['daytime_fact', 'season_fact']
+    features = area_selector_names + daytime_selector_names + season_selector_names
     target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
