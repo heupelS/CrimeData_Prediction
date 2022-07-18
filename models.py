@@ -14,6 +14,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
 import pydotplus
+from sklearn.linear_model import LogisticRegression
 import graphviz
 import datetime
 
@@ -237,13 +238,21 @@ def get_all_crimetypes(crimeData):
     return crimeData['CrmCd.Desc'].unique()
 
 
-#%% majority
+#%% majority classifier
 def majority_classifier(features, crimeData_train, crimeData_test, target):
     dummy_clf = DummyClassifier(strategy="most_frequent")
     dummy_clf.fit(crimeData_train[features], crimeData_train[target])
     DummyClassifier(strategy='most_frequent')
     dummy_clf.predict(crimeData_test[features])
     print(dummy_clf.score(crimeData_test[features], crimeData_test[target]))
+
+#%% logistic regression
+def logistic_regression(features, crimeData_train, crimeData_test, target):
+    clf = LogisticRegression(penalty = 'l2', max_iter = 100, random_state=0)
+    clf = clf.fit(crimeData_train[features], crimeData_train[target])
+    predictions = clf.predict(crimeData[features])
+    score = clf.score(crimeData_test[features],crimeData_test[target])
+    print(score)
 
 
 
