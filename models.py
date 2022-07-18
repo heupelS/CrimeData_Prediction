@@ -144,7 +144,9 @@ def clean_data():
                 new_categories.append(category_names[i])
                 break
 
-    
+        
+    crimeData['Categories'] = new_categories
+    crimeData['cat_fact'] = pd.factorize(crimeData["Categories"])[0]
 
     area_selector = [[] for i in range(21)]
 
@@ -154,11 +156,6 @@ def clean_data():
                 area_selector[i-1].append(True)
             else:
                 area_selector[i-1].append(False)
-
-    
-    crimeData['Categories'] = new_categories
-
-    crimeData['cat_fact'] = pd.factorize(crimeData["Categories"])[0]
 
     global area_selector_names
     area_selector_names = []
