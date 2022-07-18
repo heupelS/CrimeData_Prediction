@@ -228,7 +228,7 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
     dummy_clf.fit(crimeData_train[features], crimeData_train[target])
     DummyClassifier(strategy='most_frequent')
     dummy_clf.predict(crimeData_test[features])
-    dummy_clf.score(crimeData_test[features], crimeData_test[target])
+    print(dummy_clf.score(crimeData_test[features], crimeData_test[target]))
 
 
 
