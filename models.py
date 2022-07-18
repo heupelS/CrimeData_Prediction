@@ -52,6 +52,36 @@ def clean_data():
 
     crimeData.head(5)
 
+    daytime = []
+
+    for hour in crimeData['Hour']:
+        if hour < 3 or hour >= 21:
+            daytime.append('Night')
+        elif hour < 9:
+            daytime.append('Morning')
+        elif hour < 15:
+            daytime.append('Midday')
+        else:
+            daytime.append('Evening')
+
+    crimeData['Daytime'] = daytime
+    crimeData['daytime_fact'] = pd.factorize(crimeData['Daytime'])[0]
+
+    season = []
+
+    for month in crimeData['Month']:
+        if month < 3 or month == 12:
+            season.append('Winter')
+        elif month < 6:
+            season.append('Spring')
+        elif month < 9:
+            season.append('Summer')
+        else:
+            season.append('Fall')
+
+    crimeData['Season'] = season
+    crimeData['season_fact'] = pd.factorize(crimeData['Season'])[0]
+
     category_numbers = [[510,480,520,487
                          ], [330,410
                              ], [310,320
@@ -127,7 +157,7 @@ def clean_data():
 
 
 def features_target():
-    features = ['Month', 'Hour']
+    features = area_selector_names + ['daytime_fact', 'season_fact']
     target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
@@ -146,7 +176,7 @@ def train_test(crimeData):
 
 
 def decision_tree(crimeData_train, crimeData_test, features, target):
-    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=7)
+    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=25)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
     #cl_fit2 = clf.predict(crimeData_test[features])
