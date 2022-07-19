@@ -195,7 +195,7 @@ def clean_data():
 
 
 def features_target():
-    features = ['X','Y','AREA','Month','Hour'] + area_selector_names + daytime_selector_names + season_selector_names
+    features = ['X','Y','Hour','season_fact','daytime_fact'] + area_selector_names + season_selector_names + daytime_selector_names
     target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
@@ -214,7 +214,7 @@ def train_test(crimeData):
 
 
 def decision_tree(crimeData_train, crimeData_test, features, target):
-    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=25)
+    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=15)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
     result = clf.predict(crimeData_test[features])
@@ -244,9 +244,10 @@ def cross_validate(crimeData_train):
 def neural_network(features, target, crimeData_train, crimeData_test):
     nn_model = MLPClassifier(solver='adam', 
                          alpha=1e-5,
-                         hidden_layer_sizes=(40,), 
+                         hidden_layer_sizes=(20,),
+                         learning_rate='adaptive', 
                          random_state=1,
-                         max_iter=1000                         
+                         max_iter=20                         
                         )
 
     # Model Training
@@ -271,7 +272,7 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
 
 #%% logistic regression
 def logistic_regression(features, crimeData_train, crimeData_test, target):
-    clf = LogisticRegression(class_weight = 'balanced',max_iter = 1000, random_state=0)
+    clf = LogisticRegression(class_weight = 'balanced',max_iter = 50, random_state=0)
     clf = clf.fit(crimeData_train[features], crimeData_train[target])
     result = clf.predict(crimeData_test[features])
     score = clf.score(crimeData_test[features],crimeData_test[target])
@@ -292,7 +293,8 @@ def evaluate(model_name: string, Y_test, result):
     print("Precision   : ", precision)
     print("F1 Score    : ", f1)
     print("Confusion Matrix: ")
-    print(confusion_m)
+    for l in range(len(confusion_m)):
+        print(confusion_m[l])
 
 #%%
 def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,predictions):
@@ -300,16 +302,15 @@ def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,
     predictions = pd.DataFrame(predictions, columns=[target])
     dfs = {'crimeData_test': crimeData_test, model_name:predictions} # create dictionary for df names to print them
     for key in dfs:
-
+        dataframe = dfs[key]
         print (f'--------- {key} ---------' )
         plt.figure(figsize=(14,10))
-        plt.title('Amount of Crimes by Category')
-        plt.ylabel('Crime Category')
-        plt.xlabel('Amount of Crimes')
+        plt.title('Anzahl der Verbrechen nach Kategorie')
+        plt.ylabel('Verbrechen Kategorie')
+        plt.xlabel('Anzahl der Verbrechen')
 
-        crimeData.groupby(dfs[key][target]).size().sort_values(ascending=True).plot(kind='barh',cmap="plasma")
+        dataframe.groupby(dataframe[target]).size().sort_values(ascending=True).plot(kind='barh',cmap="plasma", ylabel= 'Straftat Kategorie')
 
-        plt.show()
 
 # %%
 
