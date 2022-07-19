@@ -170,7 +170,7 @@ def clean_data():
         area_selector_names.append('area_selector_'+str(i))
         crimeData['area_selector_'+str(i)] = area_selector[i-1]
     
-    print("Total number of crimes in the dataset: {}".format(len(crimeData)))
+    
     
     # Location in oridnal umwandeln
     le = preprocessing.LabelEncoder()
@@ -181,16 +181,19 @@ def clean_data():
     crimeData = crimeData.dropna(subset=['Location.1'])
     crimeData[['Y','X']] = crimeData['Location.1'].str.split(',', expand=True)
     crimeData['Y'] = pd.to_numeric(crimeData['Y'].str[1:])
+    crimeData = crimeData[crimeData['Y'] != 0.0]
     crimeData['X'] = pd.to_numeric(crimeData['X'].str[:-1])
+    crimeData = crimeData[crimeData['X'] != 0.0]
 
+    print("Total number of crimes in the dataset: {}".format(len(crimeData)))
     return crimeData
 
 # %% features and targets
 
 
 def features_target():
-    features = ['X','Y'] + area_selector_names + daytime_selector_names + season_selector_names
-    target = 'Categories'
+    features = ['X','Y','AREA','Month','Hour'] + area_selector_names + daytime_selector_names + season_selector_names
+    target = 'cat_fact'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
                         'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
@@ -212,7 +215,9 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
     result = clf.predict(crimeData_test[features])
+    #print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
+    print(cl_fit.score(crimeData_train[features], crimeData_train[target]))
     return result
 
 # %% visualization
@@ -235,7 +240,7 @@ def cross_validate(crimeData_train):
 #%% neural network
 def neural_network(features, target, crimeData_train, crimeData_test):
     nn_model = MLPClassifier(solver='adam', 
-                         alpha=1e-7,
+                         alpha=1e-5,
                          hidden_layer_sizes=(40,), 
                          random_state=1,
                          max_iter=1000                         
@@ -251,11 +256,6 @@ def neural_network(features, target, crimeData_train, crimeData_test):
 #%% random functions
 def get_all_crimetypes(crimeData):
     return crimeData['CrmCd.Desc'].unique()
-
-def get_df_name(df):  # get dataframe name to print it
-    name =[x for x in globals() if globals()[x] is df][0]
-    return name
-
 
 #%% majority classifier
 def majority_classifier(features, crimeData_train, crimeData_test, target):
