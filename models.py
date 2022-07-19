@@ -20,6 +20,9 @@ import pydotplus
 from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
 from sklearn.metrics import precision_score, recall_score, confusion_matrix, classification_report, accuracy_score, f1_score
+import folium
+from folium import plugins
+from folium.plugins import HeatMap
 import graphviz
 import datetime
 
