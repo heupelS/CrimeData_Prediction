@@ -1,4 +1,5 @@
 # %%
+import string
 from time import time
 from unicodedata import category
 from xmlrpc.client import Boolean
@@ -15,6 +16,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
 import pydotplus
 from sklearn.linear_model import LogisticRegression
+from sklearn import preprocessing
+from sklearn.metrics import precision_score, recall_score, confusion_matrix, classification_report, accuracy_score, f1_score
 import graphviz
 import datetime
 
@@ -167,13 +170,24 @@ def clean_data():
     
     print("Total number of crimes in the dataset: {}".format(len(crimeData)))
     
+    # Location in oridnal umwandeln
+    le = preprocessing.LabelEncoder()
+    le.fit(list(set(crimeData['LOCATION'])))
+    crimeData['LOCATION'] = le.transform(crimeData['LOCATION'])
+
+    # X und Y  Koordinate erstellen
+    crimeData = crimeData.dropna(subset=['Location.1'])
+    crimeData[['Y','X']] = crimeData['Location.1'].str.split(',', expand=True)
+    crimeData['Y'] = pd.to_numeric(crimeData['Y'].str[1:])
+    crimeData['X'] = pd.to_numeric(crimeData['X'].str[:-1])
+
     return crimeData
 
 # %% features and targets
 
 
 def features_target():
-    features = area_selector_names + daytime_selector_names + season_selector_names
+    features = ['X','Y'] + area_selector_names + daytime_selector_names + season_selector_names
     target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
@@ -195,9 +209,9 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
     clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=25)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
-    #cl_fit2 = clf.predict(crimeData_test[features])
+    result = clf.predict(crimeData_test[features])
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
-    return cl_fit
+    return result
 
 # %% visualization
 
@@ -243,18 +257,34 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
     dummy_clf = DummyClassifier(strategy="most_frequent")
     dummy_clf.fit(crimeData_train[features], crimeData_train[target])
     DummyClassifier(strategy='most_frequent')
-    dummy_clf.predict(crimeData_test[features])
+    result = dummy_clf.predict(crimeData_test[features])
     print(dummy_clf.score(crimeData_test[features], crimeData_test[target]))
+    return result
 
 #%% logistic regression
 def logistic_regression(features, crimeData_train, crimeData_test, target):
-    clf = LogisticRegression(penalty = 'l2', max_iter = 100, random_state=0)
+    clf = LogisticRegression(class_weight = 'balanced',max_iter = 1000, random_state=0)
     clf = clf.fit(crimeData_train[features], crimeData_train[target])
-    predictions = clf.predict(crimeData[features])
+    predictions = clf.predict(crimeData_test[features])
     score = clf.score(crimeData_test[features],crimeData_test[target])
-    print(score)
+    return predictions
 
 
+#%%
+def evaluate(model_name: string, Y_test, result):
+    accuravy = accuracy_score(Y_test, result)
+    recall = recall_score(Y_test, result, average="weighted")
+    precision = precision_score(Y_test, result, average="weighted")
+    f1 = f1_score(Y_test, result, average='micro')
+    confusion_m = confusion_matrix(Y_test, result)
+
+    print(f'------------ {model_name} -------------')
+    print("Accuracy    : ", accuravy)
+    print("Recall      : ", recall)
+    print("Precision   : ", precision)
+    print("F1 Score    : ", f1)
+    print("Confusion Matrix: ")
+    print(confusion_m)
 
 # %%
 
@@ -265,8 +295,10 @@ if __name__ == "__main__":
     crimeData = clean_data()
     features, target, category_names = features_target()
     crimeData_train, crimeData_test = train_test(crimeData)
-    cl_fit = decision_tree(crimeData_train, crimeData_test, features, target)
-    visualize(crimeData,features, category_names, cl_fit)
-    majority_classifier(features, crimeData_train, crimeData_test, target)
+    decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
+    #visualize(crimeData,features, category_names, cl_fit)
+    majority_result = majority_classifier(features, crimeData_train, crimeData_test, target)
+    evaluate('majority_classifier',crimeData_test[target],majority_result)
+    evaluate('decision_tree',crimeData_test[target],decision_tree_result)
 
 # %%
