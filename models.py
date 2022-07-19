@@ -21,8 +21,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
 from sklearn.metrics import precision_score, recall_score, confusion_matrix, classification_report, accuracy_score, f1_score
 import folium
+from sklearn.metrics import plot_confusion_matrix
 from folium import plugins
 from folium.plugins import HeatMap
+import seaborn as sns
 import graphviz
 import datetime
 
@@ -217,11 +219,11 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
     clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=15)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
-    result = clf.predict(crimeData_test[features])
+    #result = clf.predict(crimeData_test[features])
     #print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_train[features], crimeData_train[target]))
-    return result
+    return cl_fit
 
 # %% visualization
 
@@ -275,12 +277,11 @@ def logistic_regression(features, crimeData_train, crimeData_test, target):
     clf = LogisticRegression(class_weight = 'balanced',max_iter = 50, random_state=0)
     clf = clf.fit(crimeData_train[features], crimeData_train[target])
     result = clf.predict(crimeData_test[features])
-    score = clf.score(crimeData_test[features],crimeData_test[target])
     return result
 
 
 #%%
-def evaluate(model_name: string, Y_test, result):
+def evaluate(model_name: string, Y_test, result,category_names):
     accuravy = accuracy_score(Y_test, result)
     recall = recall_score(Y_test, result, average="weighted")
     precision = precision_score(Y_test, result, average="weighted")
@@ -293,9 +294,19 @@ def evaluate(model_name: string, Y_test, result):
     print("Precision   : ", precision)
     print("F1 Score    : ", f1)
     print("Confusion Matrix: ")
-    for l in range(len(confusion_m)):
-        print(confusion_m[l])
-
+    #confused confusion matrix :/
+    # %%
+    fig, ax = plt.subplots(figsize=(10, 10))
+    #decisiontreeresult muss der classifier sein nicht ergebnisse
+    plot_confusion_matrix(decision_tree_result, crimeData_test[features], crimeData_test[target],xticks_rotation='vertical', ax=ax)
+    """ df_cm = pd.DataFrame(confusion_m, index = category_names[::-1], columns = category_names)
+    plt.figure(figsize = (14,10))
+    hm = sns.heatmap(df_cm, annot=True,cmap="OrRd", fmt='g')
+    plt.title("Confusion Matrix")
+    plt.ylabel("True Class"), 
+    plt.xlabel("Predicted Class")
+    hm.set_xticklabels(hm.get_xticklabels(), rotation=45, horizontalalignment='right')
+    plt.show() """
 #%%
 def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,predictions):
 
@@ -313,7 +324,7 @@ def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,
 
 
 #%%
-def max_test():
+""" def max_test():
     crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Olympic'], inplace = True)
     crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Newton'], inplace = True)
     crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Topanga'], inplace = True)
@@ -353,15 +364,15 @@ def perAreaVis(perArea):
 
 def perPopVis(perPopulation):
     perPopulation.plot(kind="bar",figsize=(9,8), cmap = 'coolwarm')
-    _=plt.title('Crime pro Citizen', fontsize=20)
+    _=plt.title('Crime pro Citizen', fontsize=20) """
 
 #%%
-def visMap():
+""" def visMap():
     coordinates = []
     for crdnts in crimeData['Location.1']:
         tup = tuple(map(float, str(crdnts).replace('(','').replace(')','').replace(' ','').split(',')))
         coordinates.append(tup)
-    crimeData['coordinates'] = coordinates
+    crimeData['coordinates'] = coordinates """
 
 # %%
 
@@ -376,25 +387,25 @@ if __name__ == "__main__":
 
     #majority classifier
     majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
-    evaluate('majority classifier',crimeData_test[target],majority_classifier_result)
-    visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
+    evaluate('majority classifier',crimeData_test[target],majority_classifier_result,category_names)
+    #visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
     
     #decision tree
     decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
-    evaluate('decision tree',crimeData_test[target],decision_tree_result)
-    visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
+    evaluate('decision tree',crimeData_test[target],decision_tree_result, category_names)
+    #visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
     
     # dec tree to large to create png of entire tree
     # visualize(crimeData,features, category_names, cl_fit)
     
     # deep neural network
     dnn_result = neural_network(features, target, crimeData_train, crimeData_test)
-    evaluate('Deep Neural Network',crimeData_test[target],dnn_result)
-    visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
+    evaluate('Deep Neural Network',crimeData_test[target],dnn_result, category_names)
+    #visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
 
     # logistic regression
     log_regression_result = neural_network(features, target, crimeData_train, crimeData_test)
-    evaluate('logistic regression',crimeData_test[target],log_regression_result)
-    visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
+    evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
+    #visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
     
 # %%
