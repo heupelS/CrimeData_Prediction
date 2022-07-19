@@ -312,6 +312,57 @@ def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,
         dataframe.groupby(dataframe[target]).size().sort_values(ascending=True).plot(kind='barh',cmap="plasma", ylabel= 'Straftat Kategorie')
 
 
+#%%
+def max_test():
+    crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Olympic'], inplace = True)
+    crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Newton'], inplace = True)
+    crimeData.drop(crimeData.index[crimeData['AREA.NAME'] == 'Topanga'], inplace = True)
+
+    districts = ['Hollywood', 'Southeast', 'Harbor', '77th Street', 'Central',
+       'Van Nuys', 'Foothill', 'Northeast',
+       'Southwest', 'West LA', 'Mission', 'West Valley', 'Rampart',
+       'Hollenbeck', 'Devonshire', 'Pacific', 'N Hollywood', 'Wilshire']
+
+    district_area = pd.Series([17.2,10.2,27,11.9,4.5,30,46.13,29,13.11,65.14,25.1,33.5,5.54,15.2,48.31,25.74,25,13.97],index=districts)
+
+    district_population = pd.Series([300000,150000,171000,175000,40000,325000,182214,250000,165000,228000,225849,196840,164961,200000,219136,200000,220000,251000],index=districts)
+
+    global perArea
+    global perPopulation
+    perArea = pd.Series([],index=[],dtype=np.float64)
+    perPopulation = pd.Series([],index=[],dtype=np.float64)
+
+    for district in districts:
+        occurences = crimeData['AREA.NAME'].value_counts(sort=False)[district]
+        area = district_area[district]
+        population = district_population[district]
+
+        tmp1 = pd.Series([occurences/area], index=[district])
+        tmp2 = pd.Series([occurences/population], index=[district])
+
+        perArea = perArea.append(tmp1)
+        perPopulation = perPopulation.append(tmp2)
+
+    #perAreaVis(perArea=perArea)
+    #perPopVis(perPopulation=perPopulation)
+
+
+def perAreaVis(perArea):
+    perArea.plot(kind="bar",figsize=(9,8), cmap = 'coolwarm')
+    _=plt.title('Crime pro Area', fontsize=20)
+
+def perPopVis(perPopulation):
+    perPopulation.plot(kind="bar",figsize=(9,8), cmap = 'coolwarm')
+    _=plt.title('Crime pro Citizen', fontsize=20)
+
+#%%
+def visMap():
+    coordinates = []
+    for crdnts in crimeData['Location.1']:
+        tup = tuple(map(float, str(crdnts).replace('(','').replace(')','').replace(' ','').split(',')))
+        coordinates.append(tup)
+    crimeData['coordinates'] = coordinates
+
 # %%
 
 
