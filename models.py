@@ -6,6 +6,8 @@ from xmlrpc.client import Boolean
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pyparsing import col
+from pyrsistent import s
 from sklearn import datasets
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import confusion_matrix
@@ -243,13 +245,16 @@ def neural_network(features, target, crimeData_train, crimeData_test):
     nn_model.fit(crimeData_train[features], crimeData_train[target])
 
     # Prediction
-    result = nn_model.predict(crimeData_test[features]) 
-    print(result)
-    print(nn_model.score(crimeData_test[features], crimeData_test[target]))
+    result = nn_model.predict(crimeData_test[features])
+    return result
 
-#%%
+#%% random functions
 def get_all_crimetypes(crimeData):
     return crimeData['CrmCd.Desc'].unique()
+
+def get_df_name(df):  # get dataframe name to print it
+    name =[x for x in globals() if globals()[x] is df][0]
+    return name
 
 
 #%% majority classifier
@@ -265,9 +270,9 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
 def logistic_regression(features, crimeData_train, crimeData_test, target):
     clf = LogisticRegression(class_weight = 'balanced',max_iter = 1000, random_state=0)
     clf = clf.fit(crimeData_train[features], crimeData_train[target])
-    predictions = clf.predict(crimeData_test[features])
+    result = clf.predict(crimeData_test[features])
     score = clf.score(crimeData_test[features],crimeData_test[target])
-    return predictions
+    return result
 
 
 #%%
@@ -278,7 +283,7 @@ def evaluate(model_name: string, Y_test, result):
     f1 = f1_score(Y_test, result, average='micro')
     confusion_m = confusion_matrix(Y_test, result)
 
-    print(f'------------ {model_name} -------------')
+    print(f'------------- {model_name} -------------')
     print("Accuracy    : ", accuravy)
     print("Recall      : ", recall)
     print("Precision   : ", precision)
@@ -286,19 +291,55 @@ def evaluate(model_name: string, Y_test, result):
     print("Confusion Matrix: ")
     print(confusion_m)
 
+#%%
+def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,predictions):
+
+    predictions = pd.DataFrame(predictions, columns=[target])
+    dfs = {'crimeData_test': crimeData_test, model_name:predictions} # create dictionary for df names to print them
+    for key in dfs:
+
+        print (f'--------- {key} ---------' )
+        plt.figure(figsize=(14,10))
+        plt.title('Amount of Crimes by Category')
+        plt.ylabel('Crime Category')
+        plt.xlabel('Amount of Crimes')
+
+        crimeData.groupby(dfs[key][target]).size().sort_values(ascending=True).plot(kind='barh',cmap="plasma")
+
+        plt.show()
+
 # %%
 
 
 if __name__ == "__main__":
 
+    # initialisierung
     data_path = "Data/Crimes_2012-2016.csv"
     crimeData = clean_data()
     features, target, category_names = features_target()
     crimeData_train, crimeData_test = train_test(crimeData)
-    decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
-    #visualize(crimeData,features, category_names, cl_fit)
-    majority_result = majority_classifier(features, crimeData_train, crimeData_test, target)
-    evaluate('majority_classifier',crimeData_test[target],majority_result)
-    evaluate('decision_tree',crimeData_test[target],decision_tree_result)
 
+    #majority classifier
+    majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
+    evaluate('majority classifier',crimeData_test[target],majority_classifier_result)
+    visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
+    
+    #decision tree
+    decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
+    evaluate('decision tree',crimeData_test[target],decision_tree_result)
+    visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
+    
+    # dec tree to large to create png of entire tree
+    # visualize(crimeData,features, category_names, cl_fit)
+    
+    # deep neural network
+    dnn_result = neural_network(features, target, crimeData_train, crimeData_test)
+    evaluate('Deep Neural Network',crimeData_test[target],dnn_result)
+    visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
+
+    # logistic regression
+    log_regression_result = neural_network(features, target, crimeData_train, crimeData_test)
+    evaluate('logistic regression',crimeData_test[target],log_regression_result)
+    visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
+    
 # %%
