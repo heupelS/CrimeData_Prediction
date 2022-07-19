@@ -196,7 +196,7 @@ def clean_data():
 
 def features_target():
     features = ['X','Y','AREA','Month','Hour'] + area_selector_names + daytime_selector_names + season_selector_names
-    target = 'cat_fact'
+    target = 'Categories'
     category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
                         'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
                         'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
