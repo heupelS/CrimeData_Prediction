@@ -219,11 +219,11 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
     clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=15)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     print("Model Accuracy:")
-    #result = clf.predict(crimeData_test[features])
+    result = clf.predict(crimeData_test[features])
     #print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_train[features], crimeData_train[target]))
-    return cl_fit
+    return result
 
 # %% visualization
 
@@ -282,14 +282,14 @@ def logistic_regression(features, crimeData_train, crimeData_test, target):
 
 #%%
 def evaluate(model_name: string, Y_test, result,category_names):
-    accuravy = accuracy_score(Y_test, result)
+    accuracy = accuracy_score(Y_test, result)
     recall = recall_score(Y_test, result, average="weighted")
     precision = precision_score(Y_test, result, average="weighted")
     f1 = f1_score(Y_test, result, average='micro')
     confusion_m = confusion_matrix(Y_test, result)
 
     print(f'------------- {model_name} -------------')
-    print("Accuracy    : ", accuravy)
+    print("Accuracy    : ", accuracy)
     print("Recall      : ", recall)
     print("Precision   : ", precision)
     print("F1 Score    : ", f1)
@@ -298,7 +298,7 @@ def evaluate(model_name: string, Y_test, result,category_names):
     # %%
     fig, ax = plt.subplots(figsize=(10, 10))
     #decisiontreeresult muss der classifier sein nicht ergebnisse
-    plot_confusion_matrix(decision_tree_result, crimeData_test[features], crimeData_test[target],xticks_rotation='vertical', ax=ax)
+    #plot_confusion_matrix(decision_tree_result, crimeData_test[features], crimeData_test[target],xticks_rotation='vertical', ax=ax)
     """ df_cm = pd.DataFrame(confusion_m, index = category_names[::-1], columns = category_names)
     plt.figure(figsize = (14,10))
     hm = sns.heatmap(df_cm, annot=True,cmap="OrRd", fmt='g')
