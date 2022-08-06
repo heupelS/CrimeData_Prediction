@@ -16,6 +16,7 @@ from sklearn import tree
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import pydotplus
 from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
@@ -209,7 +210,7 @@ def features_target():
 
 def train_test(crimeData):
     crimeData_train, crimeData_test = train_test_split(
-        crimeData, test_size=0.33, random_state=20)
+        crimeData, test_size=0.2, random_state=20)
     return crimeData_train, crimeData_test
 
 # %% Decision tree modeling
@@ -223,6 +224,8 @@ def decision_tree(crimeData_train, crimeData_test, features, target):
     #print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
     print(cl_fit.score(crimeData_train[features], crimeData_train[target]))
+    print("cross val:")
+    scores = cross_validate(cl_fit,crimeData)
     return result
 
 # %% visualization
@@ -235,10 +238,10 @@ def visualize(crimeData, features, category_names, cl_fit):
     graph.write_pdf("decTree_crimeData.pdf")
 
 #%% Cross Validation
-def cross_validate(crimeData_train):
-    scores = cross_val_score(cl_fit, crimeData_train[features], crimeData_train[target], cv=5)
-    print("Accuracy: %0.2f (+/- %0.2f)"
-    % (scores.mean(), scores.std() ))
+def cross_validate(clf,crimeData_train):
+    scores = cross_val_score(clf, crimeData_train[features], crimeData_train[target], cv=5)
+    print("Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() ))
+    return scores
 
 
 
@@ -279,6 +282,12 @@ def logistic_regression(features, crimeData_train, crimeData_test, target):
     result = clf.predict(crimeData_test[features])
     return result
 
+#%%
+def knn(features, crimeData_train, crimeData_test, target):
+    neigh = KNeighborsClassifier(n_neighbors=10)
+    neigh.fit(crimeData_train[features], crimeData_train[target])
+    neigh.predict(crimeData_test[features])
+    cross_validate(neigh,crimeData_test)
 
 #%%
 def evaluate(model_name: string, Y_test, result,category_names):
