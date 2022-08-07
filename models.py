@@ -40,7 +40,8 @@ def clean_data():
     crimeData['Month'] = crimeData['date2'].dt.month
     crimeData['Day'] = crimeData['date2'].dt.day
 
-    time2 = []
+    #crimeData.drop(crimeData.index[crimeData['Crm.Cd'] == 997], inplace = True)
+
 
     # convert TIME.OCC into readable time format
     time1 = list(crimeData['TIME.OCC'].astype(str))
@@ -126,34 +127,54 @@ def clean_data():
         season_selector_names.append('season_selector_'+str(i))
         crimeData['season_selector_'+str(i)] = season_selector[i]
 
+    homicide = ('homicide',[110,111])
+    simple_assault_wo_family = ('simple_assault_wo_family',[624,623,622,625])
+    aggravated_assault_wo_family = ('aggravated_assault_wo_family',[230,231])
+    family_violence_simple = ('family_violence_simple',[626,627])
+    family_violence_aggravated = ('family_violence_aggravated',[235,236])
+    threats = ('threats',[930,928])
+    theft_wo_identity = ('theft_wo_identity',[440,341,420,331,350,441,421,450,474,473])
+    identity_theft = ('identity_theft',[354])
+    stolen_vehicle = ('stolen_vehicle',[510])
+    robbery = ('robbery',[210,220])
+    burglary = ('burglary',[310,320,330,410])
+    shoplifting = ('shoplifting',[442,343])
+    vandalism = ('vandalism',[740,745])
+    violent_sex_crimes = ('violent_sex_crimes',[121,122,860,821,815])
+    motor_vehicle_offenses = ('motor_vehicle_offenses',[997,438])
 
-    category_numbers = [[510,480,520,487
-                         ], [330,410
-                             ], [310,320
-                                 ], [440,442
-                                     ], [420,331
-                                         ], [210,220,341,668,343,350
-                                             ], [624,860
-                                                 ], [230,236
-                                                     ], [626,930
-                                                         ], [648,740,745,924
-                                                             ], [354,649,651,652,660,662,664,666
-                                                                 ], [438, 890, 997
-                                                                     ], [121,122,805,810,815,820,821,830,840,850,932,933,753,756,761,931,439,900,901,902,903
-                                                                         ], []]
+    violent_crimes = ('violent_crimes',
+                        homicide[1]+
+                        simple_assault_wo_family[1]+
+                        aggravated_assault_wo_family[1]+
+                        family_violence_simple[1]+
+                        family_violence_aggravated[1]+
+                        violent_sex_crimes[1]+
+                        robbery[1])
+    all_theft = ('all_theft',theft_wo_identity[1]+identity_theft[1])
+    burglary_and_stolen_vehicle = ('burglary_and_stolen_vehicle',burglary[1]+stolen_vehicle[1])
 
-    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
-                        'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
-                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
+    global category_tuples
+    category_tuples = [violent_crimes,
+                        theft_wo_identity,
+                        identity_theft,
+                            #all_theft,
+                        threats,
+                        burglary,
+                        stolen_vehicle,
+                            #burglary_and_stolen_vehicle,
+                        shoplifting,
+                        vandalism,
+                        motor_vehicle_offenses]
 
     new_categories = []
     for number in crimeData['Crm.Cd']:
-        for i in range(14):
-            if i == 13:
-                new_categories.append(category_names[i])
+        for i in range(len(category_tuples)+1):
+            if i == len(category_tuples):
+                new_categories.append('other')
                 break
-            if number in category_numbers[i]:
-                new_categories.append(category_names[i])
+            if number in category_tuples[i][1]:
+                new_categories.append(category_tuples[i][0])
                 break
 
         
@@ -198,11 +219,12 @@ def clean_data():
 
 
 def features_target():
-    features = ['X','Y','Hour','season_fact','daytime_fact'] + area_selector_names + season_selector_names + daytime_selector_names
+    features = ['X','Y','season_fact','daytime_fact'] + area_selector_names + season_selector_names + daytime_selector_names
     target = 'Categories'
-    category_names = ['Vehicle Theft','Burglary from Vehicle','Burglary','Petty Theft','Theft From Vehicle','Robbery and Grand Theft',
-                        'Battery','Aggravated Assault','Spousal Abuse and Threats','Criminal Damage and Kindred Offences',
-                        'Forgery, Personation and Cheating','Motor Vehicle Offences','Sex crimes, firearms and public justice','Other']
+    category_names = []
+    for item in category_tuples:
+        category_names.append(item[0])
+    category_names.append('other')
     return features, target, category_names
 
 # %% dividing into train and test
@@ -402,19 +424,24 @@ if __name__ == "__main__":
     #decision tree
     decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
     evaluate('decision tree',crimeData_test[target],decision_tree_result, category_names)
-    #visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
+    visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
     
     # dec tree to large to create png of entire tree
     # visualize(crimeData,features, category_names, cl_fit)
-    
+
+    # knn <--- funktioniert nicht
+    #knn_result = knn(features, crimeData_train, crimeData_test, target)
+    #evaluate('k nearest neighbor',crimeData_test[target],knn_result, category_names)
+    #visualize_categories_vs_predictions('k nearest neighbor',crimeData_test,target,knn_result)
+
     # deep neural network
-    dnn_result = neural_network(features, target, crimeData_train, crimeData_test)
-    evaluate('Deep Neural Network',crimeData_test[target],dnn_result, category_names)
+    #dnn_result = neural_network(features, target, crimeData_train, crimeData_test)
+    #evaluate('Deep Neural Network',crimeData_test[target],dnn_result, category_names)
     #visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
 
-    # logistic regression
-    log_regression_result = neural_network(features, target, crimeData_train, crimeData_test)
-    evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
+    # logistic regression <--- funktioniert nicht
+    #log_regression_result = logistic_regression(features, target, crimeData_train, crimeData_test)
+    #evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
     #visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
     
 # %%
