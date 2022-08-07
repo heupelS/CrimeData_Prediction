@@ -156,9 +156,9 @@ def clean_data():
 
     global category_tuples
     category_tuples = [violent_crimes,
-                        theft_wo_identity,
-                        identity_theft,
-                            #all_theft,
+                        #theft_wo_identity,
+                        #identity_theft,
+                            all_theft,
                         threats,
                         burglary,
                         stolen_vehicle,
@@ -306,7 +306,7 @@ def logistic_regression(features, crimeData_train, crimeData_test, target):
 
 #%%
 def knn(features, crimeData_train, crimeData_test, target):
-    neigh = KNeighborsClassifier(n_neighbors=10)
+    neigh = KNeighborsClassifier(n_neighbors=5)
     neigh.fit(crimeData_train[features], crimeData_train[target])
     neigh.predict(crimeData_test[features])
     cross_validate(neigh,crimeData_test)
@@ -397,14 +397,6 @@ def perPopVis(perPopulation):
     perPopulation.plot(kind="bar",figsize=(9,8), cmap = 'coolwarm')
     _=plt.title('Crime pro Citizen', fontsize=20) """
 
-#%%
-""" def visMap():
-    coordinates = []
-    for crdnts in crimeData['Location.1']:
-        tup = tuple(map(float, str(crdnts).replace('(','').replace(')','').replace(' ','').split(',')))
-        coordinates.append(tup)
-    crimeData['coordinates'] = coordinates """
-
 # %%
 
 
@@ -417,8 +409,8 @@ if __name__ == "__main__":
     crimeData_train, crimeData_test = train_test(crimeData)
 
     #majority classifier
-    majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
-    evaluate('majority classifier',crimeData_test[target],majority_classifier_result,category_names)
+    #majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
+    #evaluate('majority classifier',crimeData_test[target],majority_classifier_result,category_names)
     #visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
     
     #decision tree
@@ -440,8 +432,8 @@ if __name__ == "__main__":
     #visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
 
     # logistic regression <--- funktioniert nicht
-    #log_regression_result = logistic_regression(features, target, crimeData_train, crimeData_test)
-    #evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
+    log_regression_result = logistic_regression(features, crimeData_train, crimeData_test, target)
+    evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
     #visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
     
 # %%
