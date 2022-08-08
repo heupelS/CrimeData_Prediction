@@ -1,7 +1,16 @@
 # %%
+############ installations ############
+# pip install -U scikit-learn
+# pip install folium
+# pip install pandas
+# pip install numpy
+# pip install matplotlib
+# pip install numpy
+
 import string
 from time import time
 from unicodedata import category
+from unittest import result
 from xmlrpc.client import Boolean
 import pandas as pd
 import numpy as np
@@ -23,6 +32,8 @@ from sklearn import preprocessing
 from sklearn.metrics import precision_score, recall_score, confusion_matrix, classification_report, accuracy_score, f1_score
 import folium
 from sklearn.metrics import plot_confusion_matrix
+from sklearn.model_selection import validation_curve
+from sklearn.model_selection import cross_validate
 from folium import plugins
 from folium.plugins import HeatMap
 import seaborn as sns
@@ -238,16 +249,12 @@ def train_test(crimeData):
 # %% Decision tree modeling
 
 
-def decision_tree(crimeData_train, crimeData_test, features, target):
-    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=15)
+def decision_tree(crimeData_train, crimeData_test, features, target,max_depth):
+    clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=max_depth)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
-    print("Model Accuracy:")
     result = clf.predict(crimeData_test[features])
-    #print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
-    print(cl_fit.score(crimeData_test[features], crimeData_test[target]))
-    print(cl_fit.score(crimeData_train[features], crimeData_train[target]))
-    print("cross val:")
-    scores = cross_validate(cl_fit,crimeData)
+    #print("cross val:")
+    #scores = cross_validate(cl_fit,crimeData)
     return result
 
 # %% visualization
@@ -268,13 +275,13 @@ def cross_validate(clf,crimeData_train):
 
 
 #%% neural network
-def neural_network(features, target, crimeData_train, crimeData_test):
+def neural_network(features, target, crimeData_train, crimeData_test,max_iter):
     nn_model = MLPClassifier(solver='adam', 
                          alpha=1e-5,
                          hidden_layer_sizes=(20,),
                          learning_rate='adaptive', 
                          random_state=1,
-                         max_iter=20                         
+                         max_iter=max_iter                         
                         )
 
     # Model Training
@@ -282,11 +289,12 @@ def neural_network(features, target, crimeData_train, crimeData_test):
 
     # Prediction
     result = nn_model.predict(crimeData_test[features])
-    return result
 
-#%% random functions
-def get_all_crimetypes(crimeData):
-    return crimeData['CrmCd.Desc'].unique()
+    #cross validation
+    print("cross val:")
+    scores = cross_validate(nn_model,crimeData)
+
+    return result
 
 #%% majority classifier
 def majority_classifier(features, crimeData_train, crimeData_test, target):
@@ -298,18 +306,28 @@ def majority_classifier(features, crimeData_train, crimeData_test, target):
     return result
 
 #%% logistic regression
-def logistic_regression(features, crimeData_train, crimeData_test, target):
-    clf = LogisticRegression(class_weight = 'balanced',max_iter = 50, random_state=0)
+def logistic_regression(features, crimeData_train, crimeData_test, target,max_iter):
+    clf = LogisticRegression(class_weight = 'balanced',max_iter = max_iter, random_state=0)
     clf = clf.fit(crimeData_train[features], crimeData_train[target])
     result = clf.predict(crimeData_test[features])
+    
+    #cross validation
+    print("cross val:")
+    scores = cross_validate(clf,crimeData)
+
     return result
 
 #%%
-def knn(features, crimeData_train, crimeData_test, target):
-    neigh = KNeighborsClassifier(n_neighbors=5)
+def knn(features, crimeData_train, crimeData_test, target, n_neighbors):
+    neigh = KNeighborsClassifier(n_neighbors=n_neighbors)
     neigh.fit(crimeData_train[features], crimeData_train[target])
-    neigh.predict(crimeData_test[features])
-    cross_validate(neigh,crimeData_test)
+    results = neigh.predict(crimeData_test[features])
+    
+    #cross validation
+    print("cross val:")
+    scores = cross_validate(neigh,crimeData)
+    return results
+
 
 #%%
 def evaluate(model_name: string, Y_test, result,category_names):
@@ -327,7 +345,7 @@ def evaluate(model_name: string, Y_test, result,category_names):
     print("Confusion Matrix: ")
     #confused confusion matrix :/
     # %%
-    fig, ax = plt.subplots(figsize=(10, 10))
+    #fig, ax = plt.subplots(figsize=(10, 10))
     #decisiontreeresult muss der classifier sein nicht ergebnisse
     #plot_confusion_matrix(decision_tree_result, crimeData_test[features], crimeData_test[target],xticks_rotation='vertical', ax=ax)
     """ df_cm = pd.DataFrame(confusion_m, index = category_names[::-1], columns = category_names)
@@ -353,6 +371,29 @@ def visualize_categories_vs_predictions(model_name:string,crimeData_test,target,
 
         dataframe.groupby(dataframe[target]).size().sort_values(ascending=True).plot(kind='barh',cmap="plasma", ylabel= 'Straftat Kategorie')
 
+#%% plot_fitting_graph_error_vs_complexity
+def plot_fitting_graph_error_vs_complexity(model_name,model,par_name,param_range,crimeData_train,target):
+    param_range = [1, 5, 10, 15, 20, 25,100]
+    train_scores, test_scores = validation_curve(
+        model,
+        crimeData_train[features],
+        crimeData_train[target],
+        param_name=par_name,
+        param_range=param_range,
+        cv = 5,
+        scoring="accuracy",
+        n_jobs=2,
+    )
+    train_error = 1 - np.mean(train_scores, axis=1)
+    test_error = 1 - np.mean(test_scores, axis=1)
+
+    plt.title(f"Validation curve for {model_name}")
+    plt.xlabel(f"Komplexität ({par_name})")
+    plt.ylabel("Error in %")
+    plt.plot(param_range,train_error,label = 'Training Score')
+    plt.plot(param_range,test_error,label = 'Cross Val. Test Score')
+    plt.legend()
+    plt.show()
 
 #%%
 """ def max_test():
@@ -409,31 +450,55 @@ if __name__ == "__main__":
     crimeData_train, crimeData_test = train_test(crimeData)
 
     #majority classifier
-    #majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
-    #evaluate('majority classifier',crimeData_test[target],majority_classifier_result,category_names)
-    #visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
+    majority_classifier_result = majority_classifier(features, crimeData_train, crimeData_test, target)
+    evaluate('majority classifier',crimeData_test[target],majority_classifier_result,category_names)
+    visualize_categories_vs_predictions('majority classifier',crimeData_test,target,majority_classifier_result)
     
     #decision tree
-    decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target)
+    decision_tree_result = decision_tree(crimeData_train, crimeData_test, features, target,15)
     evaluate('decision tree',crimeData_test[target],decision_tree_result, category_names)
     visualize_categories_vs_predictions('decision tree',crimeData_test,target,decision_tree_result)
+    plot_fitting_graph_error_vs_complexity('decision tree',model = tree.DecisionTreeClassifier(criterion ="gini"),
+                                            par_name='max_depth',param_range=[1, 5, 10, 15, 20, 25,100],
+                                            crimeData_train = crimeData_train,target = target)
     
     # dec tree to large to create png of entire tree
     # visualize(crimeData,features, category_names, cl_fit)
 
-    # knn <--- funktioniert nicht
-    #knn_result = knn(features, crimeData_train, crimeData_test, target)
-    #evaluate('k nearest neighbor',crimeData_test[target],knn_result, category_names)
-    #visualize_categories_vs_predictions('k nearest neighbor',crimeData_test,target,knn_result)
+    # knn 
+    # this part takes about 13 min to run 
+    knn_result = knn(features, crimeData_train, crimeData_test, target,5)
+    evaluate('k nearest neighbor',crimeData_test[target],knn_result, category_names)
+    visualize_categories_vs_predictions('k nearest neighbor',crimeData_test,target,knn_result)
+
+    # this function takes really long to plot (> 60 min)
+    # we only need to run it one time to have our optimal complexity degree (n_neighbors)!
+    # comment in the three lines below to run
+    #plot_fitting_graph_error_vs_complexity('k nearest neighbor',KNeighborsClassifier(),
+    #                                        par_name='n_neighbors',param_range=[1,3,5,7,10],
+    #                                        crimeData_train = crimeData_train,target = target)
 
     # deep neural network
-    #dnn_result = neural_network(features, target, crimeData_train, crimeData_test)
-    #evaluate('Deep Neural Network',crimeData_test[target],dnn_result, category_names)
-    #visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
+    dnn_result = neural_network(features, target, crimeData_train, crimeData_test,20)
+    evaluate('Deep Neural Network',crimeData_test[target],dnn_result, category_names)
+    visualize_categories_vs_predictions('Deep Neural Network',crimeData_test,target,dnn_result)
+    
+    # this function takes really long to plot
+    #plot_fitting_graph_error_vs_complexity('Deep Neural Network',model = MLPClassifier(solver='adam', alpha=1e-5,
+    #                                        hidden_layer_sizes=(20,),
+    #                                        learning_rate='adaptive', random_state=1,                       
+    #                                        ),
+    #                                        par_name='max_iter',param_range=[5, 10, 15, 20, 25, 100, 250],
+    #                                        crimeData_train = crimeData_train,target = target)
 
     # logistic regression <--- funktioniert nicht
-    log_regression_result = logistic_regression(features, crimeData_train, crimeData_test, target)
+    log_regression_result = logistic_regression(features, crimeData_train, crimeData_test, target,200)
     evaluate('logistic regression',crimeData_test[target],log_regression_result, category_names)
-    #visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
+    visualize_categories_vs_predictions('logistic regression',crimeData_test,target,log_regression_result)
+    
+    # this function takes really long to plot
+    #plot_fitting_graph_error_vs_complexity('Deep Neural Network',model = LogisticRegression(class_weight = 'balanced'),
+    #                                        par_name='max_iter',param_range=[5, 10, 15, 20, 25, 100, 250],
+    #                                        crimeData_train = crimeData_train,target = target)
     
 # %%
