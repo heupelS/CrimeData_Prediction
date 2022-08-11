@@ -41,7 +41,7 @@ import datetime
 
 # %% Cleaning
 
-def clean_data():
+def data_preparation():
     crimeData = pd.DataFrame(pd.read_csv(data_path))
 
     crimeData = crimeData.dropna(subset=['AREA', 'TIME.OCC', 'CrmCd.Desc'])
@@ -252,8 +252,8 @@ def decision_tree(crimeData_train, crimeData_test, features, target,max_depth):
     clf = tree.DecisionTreeClassifier(criterion ="gini",max_depth=max_depth)
     cl_fit = clf.fit(crimeData_train[features], crimeData_train[target])
     result = clf.predict(crimeData_test[features])
-    #print("cross val:")
-    #scores = cross_validate(cl_fit,crimeData)
+    print("cross val:")
+    scores = cross_validate(cl_fit,crimeData)
     return result
 
 # %% visualization
@@ -337,10 +337,10 @@ def evaluate(model_name: string, Y_test, result,category_names):
     confusion_m = confusion_matrix(Y_test, result)
 
     print(f'------------- {model_name} -------------')
-    print("Accuracy    : ", accuracy)
-    print("Recall      : ", recall)
-    print("Precision   : ", precision)
-    print("F1 Score    : ", f1)
+    print("Accuracy    : ", round(accuracy,3), '%')
+    print("Recall      : ", round(recall,3), '%')
+    print("Precision   : ", round(precision,3), '%')
+    print("F1 Score    : ", round(f1,3), '%')
     print("Confusion Matrix: ")
     #confused confusion matrix :/
     # %%
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 
     # initialisierung
     data_path = "Data/Crimes_2012-2016.csv"
-    crimeData = clean_data()
+    crimeData = data_preparation()
     features, target, category_names = features_target()
     crimeData_train, crimeData_test = train_test(crimeData)
 
@@ -465,14 +465,14 @@ if __name__ == "__main__":
 
     # knn 
     # this part takes about 13 min to run 
-    knn_result = knn(features, crimeData_train, crimeData_test, target,5)
+    knn_result = knn(features, crimeData_train, crimeData_test, target,400)
     evaluate('k nearest neighbor',crimeData_test[target],knn_result, category_names)
     visualize_categories_vs_predictions('k nearest neighbor',crimeData_test,target,knn_result)
 
     # this function takes really long to plot (> 110 min)
     # we only need to run it one time to have our optimal complexity degree (n_neighbors)!
     # comment in the three lines below to run
-    #plot_fitting_graph_error_vs_complexity('k nearest neighbor',KNeighborsClassifier(),
+    # plot_fitting_graph_error_vs_complexity('k nearest neighbor',KNeighborsClassifier(),
     #                                        par_name='n_neighbors',param_range=[10,50,100,200,400],
     #                                        crimeData_train = crimeData,target = target)
 
